@@ -1,0 +1,8 @@
+# macOS metadata
+.DS_Store
+
+# Compiled C++ binaries & debug symbols
+*.o
+*.dSYM/
+main
+a.out
