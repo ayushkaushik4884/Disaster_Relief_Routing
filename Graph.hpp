@@ -6,6 +6,10 @@
 #include <iostream>
 #include <cmath>
 #include <iomanip>
+#include <fstream>
+#include <sstream>
+#include <string>
+
 
 struct Node{
     int id;
@@ -49,7 +53,7 @@ private:
 public:
     Graph() = default;
 
-    void addNote(int id, double x, double y, bool is_station = false){
+    void addNode(int id, double x, double y, bool is_station = false){
         nodes[id] = Node(id, x, y, is_station);
         if(adj.find(id) == adj.end()){
             adj[id] = std::vector<Edge>();
@@ -146,6 +150,51 @@ public:
             }
 
         }
+    }
+
+    bool loadFromFile(const std::string& filename) {
+        std::ifstream file(filename);
+        if (!file.is_open()) {
+            std::cerr << "Error: Could not open map file '" << filename << "'.\n";
+            return false;
+        }
+
+        nodes.clear();
+        adj.clear();
+        scheduled_closures.clear();
+
+        std::string line;
+        while (std::getline(file, line)) {
+            // Skip empty lines and comments
+            if (line.empty() || line[0] == '#') continue;
+
+            std::istringstream iss(line);
+            std::string type;
+            iss >> type;
+
+            if (type == "NODE") {
+                int id, is_station;
+                double x, y;
+                if (iss >> id >> x >> y >> is_station) {
+                    addNode(id, x, y, is_station == 1);
+                }
+            } else if (type == "EDGE") {
+                int edge_id, src, dest, bidirectional;
+                double weight;
+                if (iss >> edge_id >> src >> dest >> weight >> bidirectional) {
+                    addEdge(edge_id, src, dest, weight, bidirectional == 1);
+                }
+            } else if (type == "CLOSURE") {
+                int edge_id;
+                double start_time, end_time;
+                if (iss >> edge_id >> start_time >> end_time) {
+                    addScheduledClosure(edge_id, start_time, end_time);
+                }
+            }
+        }
+
+        file.close();
+        return true;
     }
 
 };
