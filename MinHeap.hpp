@@ -39,7 +39,7 @@ private:
         }
 
         if (smallest != idx){
-            std::swap(heap[idx], heap[idx]);
+            std::swap(heap[idx], heap[smallest]);
             heapifyDown(smallest);
         }
     }
